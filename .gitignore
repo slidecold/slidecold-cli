@@ -1,0 +1,10 @@
+/dist/
+/slidecold
+*.exe
+*.test
+*.out
+coverage.*
+.DS_Store
+# Local development against ../slidecold-go; never committed.
+go.work
+go.work.sum

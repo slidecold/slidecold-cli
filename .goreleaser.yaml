@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+version: 2
+
+project_name: slidecold
+
+builds:
+  - id: slidecold
+    main: ./cmd/slidecold
+    binary: slidecold
+    env: [CGO_ENABLED=0]
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    flags: [-trimpath]
+    ldflags: ['-s -w -X main.version={{ .Version }}']
+
+archives:
+  - name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files: [README.md, LICENSE, CHANGELOG.md]
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  use: github
+
+# Homebrew package in slidecold/homebrew-tap (`brew install slidecold/tap/slidecold`). GoReleaser v2.10+
+# publishes prebuilt binaries as a cask; the old `brews` formula block is deprecated and fails `goreleaser check`.
+# Skipped until both of these exist:
+#   1. the repo github.com/slidecold/homebrew-tap;
+#   2. a repo secret HOMEBREW_TAP_TOKEN in slidecold-cli (fine-grained PAT, contents:write on homebrew-tap).
+# With the secret unset the cask is still generated in dist/ but not pushed.
+homebrew_casks:
+  - name: slidecold
+    repository:
+      owner: slidecold
+      name: homebrew-tap
+      token: '{{ .Env.HOMEBREW_TAP_TOKEN }}'
+    skip_upload: '{{ if index .Env "HOMEBREW_TAP_TOKEN" }}false{{ else }}true{{ end }}'
+    directory: Casks
+    homepage: https://slidecold.com
+    description: Command-line interface for the SlideCold API
+    license: MIT
